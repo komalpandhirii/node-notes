@@ -1,0 +1,464 @@
+1. First make a folder
+
+---------------------------------------------------------------------------------------------
+
+2. Create index.js
+
+---------------------------------------------------------------------------------------------
+
+3. Open terminal in that : -
+	
+	npm init
+	npm i nodemon
+	npm i mongoose
+	npm i body-parser
+	npm i express
+	npm i @babel-core
+	npm i @babel-node
+	npm i @babel-preset-env
+	npm i @babel-cli
+	npm i cors
+	npm i multer
+
+---------------------------------------------------------------------------------------------
+
+
+4. In package.json add server in script 
+	
+	"server":"nodemon --exec babel-node index.js"
+
+---------------------------------------------------------------------------------------------
+
+5. Create babelrc file : -
+
+	{
+    		"presets": ["@babel/preset-env"]
+	}
+
+---------------------------------------------------------------------------------------------
+
+6. In index.js file import express,mongoose,bodyParser
+
+---------------------------------------------------------------------------------------------
+	
+7. Create a PORT : -
+
+	const app = express();
+
+	const PORT = process.env.PORT || 4040
+
+	app.listen(PORT,()=>{
+  	  console.log('This Port is running on '+PORT)
+	})
+
+(TO CHECK IF PORT IS CREATED OR NO TYPE NPM RUN SERVER IN TERMINAL)
+
+---------------------------------------------------------------------------------------------
+
+8. Connect to mongoDB 
+
+	
+	mongoose.connect('mongodb://localhost:27017/mainProject')
+	.then(() =>{
+    		console.log('Database connected successfully')
+	})
+	.catch((err) =>{
+    		console.log('Something went wrong')
+	})
+
+---------------------------------------------------------------------------------------------
+
+9. In index.js file 
+
+app.use(bodyParser.json());
+
+app.use(bodyParser.urlencoded({extended:false}))
+
+---------------------------------------------------------------------------------------------
+
+10. Create middleware folder in that create cors.middleware.js file in that add
+
+const headers = {
+    allowAll:(req,res,next)=>{
+        res.header(
+            'Access-Control-Allow-Origin','*'
+        );
+
+        res.header(
+            'Access-Control-Allow-Headers',
+            'Authorization, Origin, X-Requested-With, Content-Type,Accept'
+        )
+
+        res.header(
+            'Access-Control-Allow-Methods','GET, PUT, POST, DELETE,HEAD,OPTIONS,PATCH'
+        )
+
+        next();
+    }
+}
+
+export default headers;
+
+
+Then in index.js file add this line
+
+
+app.use(middelware_cors.allowAll);
+
+---------------------------------------------------------------------------------------------
+
+ 
+11. Create 3 Folder i.e Model, Controller, Router
+
+---------------------------------------------------------------------------------------------
+
+12. Create user.model.js file in model folder in that :-
+
+	import mongoose 
+
+	import mongoose from "mongoose";
+
+	const UserSchema = mongoose.Schema({
+    		name:{
+        		type:String,
+        		required:true
+    		},
+    
+
+		ETC........
+
+		})
+
+	export default mongoose.model('User',UserSchema);
+
+---------------------------------------------------------------------------------------------
+
+13. Create user.controller.js file in controller folder in that :-
+
+
+import User from './../model/user.model';
+
+// import user from model -------------
+
+export const addUser = (req,res) =>{
+    try{
+        const {name,email,password,contact} = req.body
+        const saveUser = new User({name:name,email:email,password:password,contact:contact})
+        const userdata = saveUser.save();
+
+        if(userdata){
+            res.status(200).json({
+                data:saveUser,
+                message:'Successfully user added'
+            })
+        } else{
+            res.status(500).json({
+                message:'Something went wrong'
+            })
+        }
+    } catch(error){
+        console.log(error)
+    }
+}
+
+
+---------------------------------------------------------------------------------------------
+14. Create user.router.js
+
+	import express from 'express';
+
+	import { addUser } from '../controller/user.controller';
+
+	const router = express.Router();
+
+	router.post('/addUser',addUser)
+
+	export default router
+
+---------------------------------------------------------------------------------------------
+15. Then in index.js file import userRouter from './path of your user.router.js file is'
+
+and in the end add (app.use('/User',userRouter))
+
+---------------------------------------------------------------------------------------------
+16. Then get in thunder if it's working or not for add User
+---------------------------------------------------------------------------------------------
+
+17. For get user in controller all logical code will come
+
+export const getUser = async (req,res)=>{
+
+    const user =  await User.find({});
+    res.status(200).json({        data:user,
+        message:'Data fetched successfully!'
+
+    })
+}
+
+---------------------------------------------------------------------------------------------
+
+18. Then in user.router.js file 
+
+
+import { addUser, (You can add whichever you want like getUser, editUser, updateUser etc) } from '../controller/user.controller';
+
+	router.post('/getUser',getUser)
+
+---------------------------------------------------------------------------------------------
+19. For delete User in controller all logical code will come
+
+export const deleteUser = async(req,res)=>{
+    const userid = req.params.user_id
+
+    const deletedData = await User.deleteOne({_id:userid});
+    res.status(200).json({
+        message:'Data deleted successfully!'
+    })
+}
+
+Add in import {______}
+---------------------------------------------------------------------------------------------
+20. Pass the id in router which you have given after req.params.(___________) 
+
+router.delete('/deleteUser/:user_id',deleteUser);
+
+Add in import {______}
+---------------------------------------------------------------------------------------------
+
+21. To Update data there will be 2 api to be created which is GET SINGLE USER AND UPDATE USER
+
+export const getSingleUser = async(req,res)=>{
+    const userid = req.params.user_id
+    const getData = await User.findOne({_id:userid})
+    res.status(200).json({
+        data:getData,
+        message:'Single user data fetched.'
+    })
+}
+
+
+
+export const updateUser = async (req,res)=>{
+
+    try {
+        const {name,email,password,contact,userid} = req.body
+        const updatedData = await User.updateOne( {_id:userid},{name:name,email:email,password:password,contact:contact})
+ 
+        if(updatedData){
+            res.status(200).json({
+                data:updatedData,
+                message:'Successfully user updated !'
+            })
+        }else{
+            res.status(500).json({
+                message:'Something went wrong !'
+            })
+        }
+
+
+    } catch (error) {
+       
+        console.log(error)
+    }
+}
+
+---------------------------------------------------------------------------------------------
+
+
+DO SAME FOR CATEGORY
+
+---------------------------------------------------------------------------------------------
+
+FOR PRODUCT AGAIN CREATE MODEL CONTROLLER ROUTER
+
+IN MODEL IMPORT CATEGORY MODEL 
+
+import categorymode from '../model/category.model'
+
+
+ category:{
+        ref:categorymode,
+        type:Schema.Types.ObjectId,
+        required:true
+    },(SO ON...)
+
+---------------------------------------------------------------------------------------------
+
+IN CONTREOLLER OF PRODUCT ADD THE BELOW CODE TO JOIN THE TWO TABLES
+
+
+    const products = await product.find({}).populate('category');
+
+
+
+---------------------------------------------------------------------------------------------
+
+
+// AFTER PRODUCT AND CATEGORY-------------------------
+
+
+22. To upload Image
+
+
+(PRODUCT.CONTROLLER)
+
+	Install multer
+	import multer
+import (File System) fs from 'fs'
+
+
+const storage = multer.diskStorage({
+    destination:function(req,file,cb){
+        cb(null,'assets/');
+    },
+    filename:function(req,file,cb){
+
+        const extArr = file.originalname.split('.');
+        const ext = extArr[extArr.length-1];
+         extArr.pop();
+         const name = extArr.join(',').replace(/,/ig,',');
+         const uniqueSuffix = Date.now();
+        cb(null,name+'-'+uniqueSuffix+'.'+ext);
+    }
+})
+
+
+const upload = multer({storage:storage})
+
+
+---------------------------------------------------------------------------------------------
+
+Add this is addProduct try
+
+const uploadImages = upload.single('image');
+        uploadImages(req, res, async function(err){
+        const filename = req.file.filename;
+
+---------------------------------------------------------------------------------------------
+
+Add this is deleteProduct In Product Controller
+
+
+    const productid = req.params.product_id;
+
+	if(deletedData.acknowledged){
+        console.log(productData)
+        fs.unlinkSync('assets/'+productData.image)
+    }
+
+---------------------------------------------------------------------------------------------
+
+ADD IN UPDATEPRODUCT
+
+
+try{
+
+const uploadImages = upload.single('image');
+        uploadImages(req,res,async function(err){
+            console.log(req.body)
+        var filename = '';
+        if(req.body.image == 'undefined'){
+            filename = req.body.oldimage;
+        }else{
+            filename = req.file.filename
+
+            fs.unlinkSync('assets/'+req.body.oldimage)
+        }
+
+}
+
+const productid = req.params.product_id;
+
+---------------------------------------------------------------------------------------------
+
+
+IN THE BLOCK OF TRY IN ADD USER ADD THIS CODE
+
+CODE SHOULD BE LIKE THIS ↓↓↓↓
+
+export const addUser = (req,res) =>{
+    try{
+        const uploadImages = upload.single('avatar');
+        uploadImages(req,res,async function(err) {
+            const filename = req.file.filename
+            const {name,email,password,contact,gender} = req.body
+            const saveUser = new User({name:name,email:email,password:password,contact:contact,gender:gender,avatar:filename})
+
+            const userData = saveUser.save();
+
+            if(userData){
+                res.status(200).json({
+                    data:userData,
+                    message:'Succeffully added data'
+                })
+            }else{
+                res.status(500).json({
+                    message:'Something went wrong'
+                })
+            }
+        });
+    }catch(error){
+        console.log(error)
+    }
+}
+
+
+
+-----NOTE----------
+
+in add user
+
+ add the below code 
+
+
+in get user add path in between data : userData and message : 'successfully fetched data'
+
+(path:'http://localhost:1010/userAssets/'),
+
+
+in delete user unlinksync
+
+ if(deletedData.acknowledged){
+            console.log(userData)
+            fs.unlinkSync('userAssets/'+userData.avatar)
+        }
+
+BEFORE res.status(200).json({--})
+
+
+
+in get single user add path in between data : userData and message : 'successfully fetched single data'
+
+(path:'http://localhost:1010/userAssets/'),
+
+
+---------------------------------------------------------------------------------------------
+
+
+TO FILTER THE SEARCH TAG
+
+    export const getUser = async (req,res)=>{
+       const {word} = req.query;
+       const rgx = (pattern) => new RegExp(`.*${pattern}.*`);
+       const wordRgx = rgx(word);
+        // const user =  await User.find({});
+        let users = [];
+        if(word != null){
+            users = await User.find({
+                $or:[
+                    {name:{$regex:wordRgx,$options:"i" } },
+                    { email: { $regex: wordRgx, $options: "i" } },
+                ],
+            }).sort({'name':1})
+        }else{
+            console.log(2)
+            users = await User.find().sort({'name':1})
+        }
+        res.status(200).json({
+            data:users,
+            path:'http://localhost:5050/userAssets/',
+            message:'Data fetched successfully!'
+        })
+    }
+    
+        
